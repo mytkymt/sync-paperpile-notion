@@ -1,4 +1,4 @@
-# Link Paperpile to Notion
+# Sync Paperpile to Notion
 
 A comprehensive tool to sync academic papers from Paperpile to Notion with full PDF content embedding and extraction.
 
