@@ -1,0 +1,7 @@
+python-dotenv>=1.1.1
+requests>=2.32.5
+bibtexparser>=1.4.3
+google-api-python-client>=2.179.0
+google-auth>=2.40.3
+marker-pdf>=1.8.4
+pymupdf>=1.26.3
