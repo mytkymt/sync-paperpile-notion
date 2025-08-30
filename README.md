@@ -230,6 +230,59 @@ For regular synchronization, you can set up cyclical updates using your system's
 4. Set the action to run a program or script.
 5. Browse to the script or program you want to run and finish the setup.
 
+### For GitHub Actions (Recommended):
+
+The repository includes a GitHub Actions workflow that automatically runs the sync on a daily schedule. This is the easiest way to set up automated synchronization without managing your own server infrastructure.
+
+#### How it works:
+- **Schedule**: Runs daily at 02:00 UTC
+- **Manual Trigger**: Can be triggered manually from the GitHub Actions tab
+- **Environment**: Uses Python 3.11 with all required dependencies
+- **Security**: Credentials are stored as GitHub repository secrets
+
+#### Setup:
+1. Fork this repository to your GitHub account
+2. Go to your forked repository's **Settings** → **Secrets and variables** → **Actions**
+3. Add the following repository secrets:
+   - `PAPERPILE_EXPORT_URL`: Your Paperpile BibTeX export URL
+   - `NOTION_TOKEN`: Your Notion integration token  
+   - `NOTION_DB_ID`: Your Notion database ID
+   - `AUTHORS_DB_ID` (optional): Your authors database ID
+   - `GOOGLE_APPLICATION_CREDENTIALS_JSON` (optional): Your Google service account JSON as a string
+
+#### The workflow file:
+```yaml
+name: Sync Paperpile to Notion
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Daily at 02:00 UTC
+  workflow_dispatch:      # Manual trigger
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    - run: pip install -r requirements.txt
+    - run: python main.py
+      env:
+        PAPERPILE_EXPORT_URL: ${{ secrets.PAPERPILE_EXPORT_URL }}
+        NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        NOTION_DB_ID: ${{ secrets.NOTION_DB_ID }}
+        # ... other secrets
+```
+
+📁 **Workflow location**: [`.github/workflows/sync-paperpile-notion.yml`](.github/workflows/sync-paperpile-notion.yml)
+
+#### Monitoring:
+- View sync logs in the **Actions** tab of your GitHub repository
+- Receive email notifications for failed runs (configurable in GitHub settings)
+- Manual runs can be triggered anytime from the Actions tab
+
 ## 🏗️ Architecture
 
 The tool is built with a modular architecture:

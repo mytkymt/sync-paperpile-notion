@@ -1,0 +1,53 @@
+name: Sync Paperpile to Notion
+
+on:
+  schedule:
+    # Run daily at 02:00 UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    # Allow manual triggering
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run Paperpile to Notion sync
+      env:
+        PAPERPILE_EXPORT_URL: ${{ secrets.PAPERPILE_EXPORT_URL }}
+        NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        NOTION_DB_ID: ${{ secrets.NOTION_DB_ID }}
+        AUTHORS_DB_ID: ${{ secrets.AUTHORS_DB_ID }}
+        GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
+      run: |
+        # Create .env file from secrets for the application
+        echo "PAPERPILE_EXPORT_URL=$PAPERPILE_EXPORT_URL" >> .env
+        echo "NOTION_TOKEN=$NOTION_TOKEN" >> .env
+        echo "NOTION_DB_ID=$NOTION_DB_ID" >> .env
+        
+        # Add optional environment variables if they exist
+        if [ ! -z "$AUTHORS_DB_ID" ]; then
+          echo "AUTHORS_DB_ID=$AUTHORS_DB_ID" >> .env
+        fi
+        
+        # Set up Google Drive credentials if provided
+        if [ ! -z "$GOOGLE_APPLICATION_CREDENTIALS_JSON" ]; then
+          echo "$GOOGLE_APPLICATION_CREDENTIALS_JSON" > google-credentials.json
+          echo "GOOGLE_APPLICATION_CREDENTIALS=google-credentials.json" >> .env
+        fi
+        
+        # Run the sync
+        python main.py
